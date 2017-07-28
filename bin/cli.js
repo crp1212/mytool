@@ -14,11 +14,18 @@ program.version(require('../package.json').version)
 program.usage('[options] [project name]')
 program.parse(process.argv);
 
+
 var bool = false,//判断是否有同名文件或者文件夹
 	fileName,
     pname = program.args[0],
     temPath = path.resolve(__dirname ,"../"),//得到tem文件夹所在的路径
     cmdpath = process.cwd() ;//cmd执行命令时所在路径
+
+var fileMap = {
+	'.g' : ".gitignore",
+	'.b' : ".babelrc",	
+}
+
 function errFn(err){
 	err ? console.error(err) : ""
 }
@@ -87,16 +94,21 @@ function createFloder(target,aims){//target是要复制的目录,aims是要生�
 	}).catch(err=>console.log(err))
 }
 function newFile(pname){
-	if(pname=='.git'){
-	   		fs.writeFile('.gitignore','',function(err){if(err){console.log(err)}})
-	   		return ''
-	 }
-	var arr=pname.split(".");
-	var type=arr[arr.length-1];//得到文件后缀,判断生成的文件
+	if(hasFile(pname)){
+		openfile(pname)
+		return ''
+	}
+	if(fileMap[pname]){
+	 	fs.writeFile(fileMap[pname],"", err => err ? console.error(err) : openfile(pname)) ;
+	 	return ''
+	}
+	var arr=pname.split(".")  ,
+		suffix = arr.slice(-1)[0]  ,
+	    type=arr[arr.length-1];//得到文件后缀,判断生成的文件
 	//如果不是存在模板的文件类型,直接就生成空文件
-	if(!sameFileOrFolder(fileTypeArr,type)){
-		fs.writeFile(pname,'',function(err){if(err){console.log(err)}});
-		opnefile(pname);
+	if(!sameFileOrFolder(fileTypeArr,suffix)){
+		console.log(!sameFileOrFolder(fileTypeArr,suffix))
+		fs.writeFile(pname,'',err => err ? console.error(err) : openfile(pname));
 		return ''
 	}
 	fsPro(fs.readdir,temPath+'/tem/'+type)
@@ -113,7 +125,7 @@ function newFile(pname){
 			.then((data)=>{
 				fsPro(fs.writeFile,pname,data.toString())
 			}).then(()=>{
-				opnefile(pname,program.args[2])
+				openfile(pname,program.args[2])
 			})
 		}else{
 			console.log('no file name')
@@ -126,11 +138,12 @@ function sameFileOrFolder(arr,name){
     return bool
 }
 
-function opnefile(pname,bool){//bool判断是否用浏览器打开,个人默认是谷歌
+function openfile(pname,bool){//bool判断是否用浏览器打开,个人默认是谷歌
 	var subl='subl '+pname;
-	bool ? opn(campath+'/'+pname,{app: ['chrome']}) : "" 
+	bool ? opn(cmdpath+'/'+pname,{app: ['chrome']}) : "" 
 	exec(subl,(error,stdout,stderr) => {
-		error ? console.error(error) : ""
+		if(error){console.log(error)}
+		else{return ""}
 	})
 }
 
@@ -151,4 +164,8 @@ function addstr(){
 	return util.isObject(str) 
 		? arr.slice(0,-1).join(str.ps)
 		:  arr.join('/') 
+}
+function hasFile(filename){//if has same filename in this folder
+	var files = fs.readdirSync(cmdpath) 
+	return sameFileOrFolder(files,filename)
 }
