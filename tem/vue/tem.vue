@@ -1,21 +1,33 @@
 <template>
-	<div></div>
+    <div>
+    </div>
 </template>
 
 <script>
-	export default {
-		data:function(){
-			return {}
-		},
-		methods:{
+export default {
+    components: {
 
-		},
-		computed:{
+    },
+    mixins: {
 
-		}
-	}
+    },
+    props: {
+
+    },
+    data: function () {
+        return {}
+    },
+    methods: {
+
+    },
+    computed: {
+
+    },
+    watch: {},
+    created () { }
+}
 </script>
 
 <style  scoped>
-	
+
 </style>

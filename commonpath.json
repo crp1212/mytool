@@ -1,4 +1,10 @@
 {
 	"cli" : "D:\\web\\webProject\\cli" ,
-	"ai" : "F:\\work\\jifei-company\\jfaiweb\\admin"
+	"ext" : "D:\\web\\webProject\\chrome_extensions",
+	"ai" : "F:\\work\\jifei-company\\jfaiweb\\admin",
+	"cwd" : "cwd" ,
+	"pro" : "F:\\work\\jifei\\html\\model\\model",
+	"tem" : "D:\\test\\tem" ,
+	"app" : "F:\\work\\jifei-company\\jfaiweb\\app",
+	"rl"  : "D:\\web\\webProject\\reactlearn\\react-learn" 
 }
