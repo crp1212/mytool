@@ -42,6 +42,9 @@ function fsPro(fsFn){
 		(resolve,reject) => {
 			arg.push(function(err,data){
 				errFn(err)
+				if (err) {
+					reject(err)
+				}
 				resolve(data)
 			})
 			fsFn.apply(null,arg)
@@ -75,9 +78,7 @@ function newFolder(){
 		aims = addstr(cmdpath,pname)
 
 	fsPro(fs.mkdir,aims)
-		.then(
-			createFloder(paths,aims)
-		) 
+	createFloder(paths,aims)
 }
 function openWebsite(){
 	if(pname){
@@ -99,6 +100,7 @@ function createFloder(target,aims){//target是要复制的目录,aims是要生�
 	 		}
 	 	)
 }
+
 function fileOrFolderExist(path,str,cb){
 	fsPro(fs.stat,path)
 		.then(
@@ -159,10 +161,10 @@ function newFile(str){
 				)		
 	}
 }
-function sameFileOrFolder(arr,name){
-	//arr中存在对应的name时,会返回索引+1 避免0时判断为false
-    var bool = arr.some( (val,ind) => val === name ? ind+1 : false ) 
-    return bool
+
+function sameFileOrFolder(arr, name) { // 判断是否存在同名文件或者文件夹
+    // arr中存在对应的name时,会返回索引+1 避免0时判断为false
+    return arr.indexOf(name) !== -1
 }
 
 function openfile(pname,bool){//bool判断是否用浏览器打开,个人默认是谷歌
@@ -174,30 +176,27 @@ function openfile(pname,bool){//bool判断是否用浏览器打开,个人默认�
 	})
 }
 
-function openfolder(){//适用于window
-	var str = program.args[0] ;
-
-	if(str===undefined){
-		str = "cwd"
-	}
-	if(commonpath[str] == void 0){
+function openfolder(){
+	var str = program.args[0] || 'cwd'
+	if (commonpath[str] === void 0) {
 		console.log(chalk.bgYellowBright.black('param ERR: ')+'  '+chalk.bgRed.white('such folder is no exist'));
 		return ''
 	}
-	if(str == "cwd"){
+	if(str === "cwd"){
 		commonpath[str] = cmdpath 	
 	}
 	var commandStr = 'start ' + commonpath[str] 
-	if(program.args[1]){
-		exec('code ' + commonpath[str], (error,stdout,stderr)=>{
-			if(error){console.error(error)}
-		})
-		return ''
-	}
+    if (program.args[1]) {
+        exec('code ' + commonpath[str], (error, stdout, stderr) => {
+            errFn(error)
+        })
+        return ''
+    }
 	exec(commandStr,(error,stdout,stderr)=>{
-		if(error){console.error(error)}
+		errFn(error)
 	})
 }
+
 function addstr(){
 	var  arr = [].slice.call(arguments) ;
 	var  str = arr.slice(-1)[0] ;
