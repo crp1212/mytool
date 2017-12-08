@@ -50,4 +50,20 @@ function getSSQ (str) {
 	}
 }
 
- module.exports = getBt
+async function getStockNum (stockNum) { // 爬取的是东方财富的股票信息
+	var stockType = {
+		'0': 2,
+		'6': 1
+	}
+	var data = await axios.get(`http://nuff.eastmoney.com/EM_Finance2015TradeInterface/JS.ashx?id=${stockNum}${stockType[stockNum[0]]}`)
+	var arr
+	data.data.replace(/callback\((.+?)\)/, (str, result) => {
+		arr = JSON.parse(result).Value
+	})
+	return arr
+}
+
+module.exports = {
+	getBt,
+	getStockNum
+}

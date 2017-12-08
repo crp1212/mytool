@@ -56,5 +56,9 @@ class Lib {
             return key + ':' + obj[key]
         }).join(';')
     }
+    getInd (arr, index) { // 通过索引获取数组的元素,支持负数是从后面获取
+        var l = arr.length
+        return index < 0 ? arr[l + index] : arr[index]
+    }
 }
 module.exports = Lib

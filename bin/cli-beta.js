@@ -6,14 +6,15 @@ var fs = require('fs'),
     path = require('path'),
     program = require('commander'),
     exec = require('child_process').exec,
-    fileTypeArr = ['js','css','html','vue','py','jsx'],//可以有模板的文件后缀
+    fileTypeArr = ['js', 'css', 'html', 'vue', 'py', 'jsx', 'java'],//可以有模板的文件后缀
     opn = require('opn') ,
     chalk = require('chalk'),
     commonpath = require('../commonpath.json') ,
     websitepath = require('../website.json')
     util = require('../util/index.js'),
-    getBt = require('../crawler') ,
-    rename = require('../tool/rename.js')
+    {getBt, getStockNum} = require('../crawler') ,
+    rename = require('../tool/rename.js'),
+    stockDefault = require('../stock-default.json')
 
 program
     .version(require('../package.json').version)
@@ -23,7 +24,8 @@ program
     .option('-t, --createfile', 'create a new file in specified floder')
     .option('-w, --openwebsite', 'open website which my appoint')
     .option('-b, --bts', 'open website which my appoint')
-    .option('-r, --rename', 'rename the file in the folder')
+    .option('-r, --rename', 'rename the file suffix in the folder; p.js => p.html  --- crp -r js html')
+    .option('-s, --getStock', 'get the stock information')
     .parse(process.argv);
 
 var bool = false,//判断是否有同名文件或者文件夹
@@ -73,7 +75,10 @@ switch (true) {
     case program.rename:
         rename(cmdpath, new RegExp(program.args[0]), program.args[1])
     break
-	default :
+    case program.getStock:
+        getStock()
+    break
+    default :
 		pname.split(',').forEach(x => newFile(x))
 }
 
@@ -133,10 +138,28 @@ async function newFile (str) { // 生成新文件
             var paths = addstr(temPath, suffix)
             var files = await fsPro(fs.readdir, paths)
             var hasSameFileOrFolder = sameFileOrFolder(files, pname)
-            var readName = hasSameFileOrFolder ? addstr(paths, pname) : addstr(paths, addstr(program.args[2] || 'tem', suffix, { ps: "." }))
+            var readName = hasSameFileOrFolder ? addstr(paths, pname) : addstr(paths, addstr(program.args[1] || 'tem', suffix, { ps: "." }))
             var data = await fsPro(fs.readFile, readName)
-            writeFileHandle(pname, data.toString(), program.args[1])
+            var content = fileNameReplace(data.toString())
+            if (suffix === 'java') {
+                pname = firstWordUpper(pname)
+            }
+            writeFileHandle(pname, content,  program.args[2])
     }
+}
+
+function fileNameReplace (str) { // 处理特定格式的文件,把文件名替换进去
+    var arr = pname.split(".")
+    var bool = program.args[1] === 'rn' || arr.slice(-1)[0] === 'java'
+    if (bool) {
+        return str.replace(/\$/g, arr[0][0].toUpperCase() + arr[0].slice(1))
+    } else {
+        return str
+    }
+}
+
+function firstWordUpper (str) { // 首字母大写
+    return str.split('').map((x,y) => y === 0 ? x.toUpperCase() : x).join('')
 }
 
 function sameFileOrFolder(arr, name) { // 判断是否存在同名文件或者文件夹
@@ -192,4 +215,34 @@ function writeFileHandle (names, data, bool) {
         names = path.resolve(commonpath['tem'], names)
     }
     fs.writeFile(names, data, err => err ? console.error(err) : openfile(names, bool));
+}
+
+async function getStock () { // 获取股票中需要的信息 (名字 当前价格 涨跌幅(相对于昨天) 涨跌幅(相对于自己购买时) 自己的盈亏)
+    // console.log(arr[2], arr[25], arr[29])
+    // 获取的股票信息数组中 2是股票名字 25是当前价格 29是相对于昨天涨跌幅 
+    var isSelfStock = !program.args[0]
+    var arr = isSelfStock ? Object.keys(stockDefault) : program.args 
+    arr.forEach(
+        async (num) => {
+            var result = await getStockNum(num)
+            if (isSelfStock) {
+                // 是自己的股票的时候显示出自己利润百分比和具体值
+                var stockBuyPrice = stockDefault[num][0]
+                var stockCount = stockDefault[num][1]
+                var selfProfitPercent = ((result[25] - stockBuyPrice) * 100 / stockBuyPrice).toFixed(2)
+                var selfProfitMoney = parseInt(selfProfitPercent * stockCount * stockBuyPrice / 100)
+                result.push(selfProfitPercent >= 0 ? ` ${selfProfitPercent}%` : `${selfProfitPercent}%`)
+                result.push(selfProfitMoney)
+                arrLog(result, 2, 25, 29, -2, -1)
+            } else {
+                arrLog(result, 2, 25, 29)
+            }
+        }
+    )
+
+}
+function arrLog (arr) { // 打印同一个数组的多个索引
+    var arg = [].slice.call(arguments, 1)
+    var str = arg.map(index => util.getInd(arr, index)).join('  ')
+    console.log(str)
 }
