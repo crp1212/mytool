@@ -16,7 +16,8 @@
     "chalk": "^2.3.0",
     "commander": "^2.9.0",
     "iconv-lite": "^0.4.18",
-    "opn": "^5.1.0"
+    "opn": "^5.1.0",
+    "rimraf": "^2.6.2"
   },
   "devDependencies": {
     "axios": "^0.16.2",

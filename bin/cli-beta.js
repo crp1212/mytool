@@ -14,7 +14,8 @@ var fs = require('fs'),
     util = require('../util/index.js'),
     {getBt, getStockNum} = require('../crawler') ,
     rename = require('../tool/rename.js'),
-    stockDefault = require('../stock-default.json')
+    stockDefault = require('../stock-default.json'),
+    rm = require('rimraf')
 
 program
     .version(require('../package.json').version)
@@ -26,6 +27,7 @@ program
     .option('-b, --bts', 'open website which my appoint')
     .option('-r, --rename', 'rename the file suffix in the folder; p.js => p.html  --- crp -r js html')
     .option('-s, --getStock', 'get the stock information')
+    .option('-d, --del', 'delete folder or file')
     .parse(process.argv);
 
 var bool = false,//判断是否有同名文件或者文件夹
@@ -78,6 +80,9 @@ switch (true) {
     case program.getStock:
         getStock()
     break
+    case program.del:
+        delFn()
+    break
     default :
 		pname.split(',').forEach(x => newFile(x))
 }
@@ -89,6 +94,12 @@ function newFolder () { // 生成新文件夹
 		aims = addstr(cmdpath, pname)
     fsPro(fs.mkdir, aims)
     createFloder(paths, aims) 
+}
+
+function delFn () { // 删除指定文件或者文件夹
+    rm(path.resolve(cmdpath, pname), () => {
+        console.log('success')
+    })
 }
 
 function openWebsite () { // 打开指定的一些网站
