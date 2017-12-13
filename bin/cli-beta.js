@@ -15,7 +15,8 @@ var fs = require('fs'),
     {getBt, getStockNum} = require('../crawler') ,
     rename = require('../tool/rename.js'),
     stockDefault = require('../stock-default.json'),
-    rm = require('rimraf')
+    rm = require('rimraf'),
+    debugFile = require('../debug/index.js')
 
 program
     .version(require('../package.json').version)
@@ -23,7 +24,7 @@ program
     .option('-o, --openfloder', 'open a floder with the specified name')
     .option('-f, --createfloder', 'create a new floder with the template')
     .option('-t, --createfile', 'create a new file in specified floder')
-    .option('-w, --openwebsite', 'open website which my appoint')
+    .option('-w, --debugFile', 'debug a file with hot reload')
     .option('-b, --bts', 'open website which my appoint')
     .option('-r, --rename', 'rename the file suffix in the folder; p.js => p.html  --- crp -r js html')
     .option('-s, --getStock', 'get the stock information')
@@ -68,8 +69,8 @@ switch (true) {
 	case program.createfloder: 
 		newFolder()
 	break
-	case program.openwebsite:
-		openWebsite()
+	case program.debugFile:
+        debugFile(path.resolve(cmdpath, pname))
 	break
 	case program.bts:
 		getBt(pname)

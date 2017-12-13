@@ -3,7 +3,6 @@ function co (cb) { // 适用于文件操作的异步
 	return new Promise(
 		(resolve, reject) => {
 			arg.push(function (err, data) {
-                errFn(err)
                 if (err) {
                     reject(err)
                 }
@@ -11,7 +10,7 @@ function co (cb) { // 适用于文件操作的异步
 			})
 			cb.apply(null, arg)
 		}				
-	)
+	).then(data => data ).catch(err => errFn(err))
 }
 
 function errFn (err) { // 错误统一处理
