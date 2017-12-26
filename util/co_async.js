@@ -4,7 +4,7 @@ function co (cb) { // 适用于文件操作的异步
 		(resolve, reject) => {
 			arg.push(function (err, data) {
                 if (err) {
-                    reject(err)
+					reject(err)
                 }
 				resolve(data)
 			})

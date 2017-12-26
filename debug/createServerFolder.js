@@ -1,7 +1,6 @@
 const fs = require('fs')
 const co = require('../util/co_async.js')
 const path = require('path')
-const transform = require('./transform.js')
 const rm = require('rimraf')
 
 async function createServerFolder (file) {

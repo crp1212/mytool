@@ -22,7 +22,6 @@ class Watch {
                 e.ws.send('update')
             }
         })
-        
     }
     async transfrom (file) {
         this.cacheFile[file] = this.resultFile[file]
@@ -30,11 +29,11 @@ class Watch {
         var bool = await co(fs.writeFile, path.resolve(__dirname, './dist/index.html'), content)
         return 'success'
     }
-    compareFile (file) {
-        return this.cacheFile[file].toString() === this.resultFile[file].toString()
-    }
     async getFile (file) {
         return await co(fs.readFile, file)
+    }
+    compareFile (file) {
+        return this.cacheFile[file].toString() === this.resultFile[file].toString()
     }
     getUuid () {
         return Date.now() + '' + Math.floor(Math.random() * 100000)

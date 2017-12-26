@@ -12,29 +12,26 @@ writerStream.on('finish', function() {
 })
 writerStream.on('error', function(err){
     console.log(err.stack);
- })
- var count = 0
- var remindCount = 0
- var percent = 0
+})
+var count = 0
+var remindCount = 0
+var percent = 0
 async function getNovel (path) {
-    path = path || '/3_3078/7410604.html'
+    path = path || '/3_3078/7411104.html'
     var data = await axios.get(`${host}${path}`)
     var $ = cheerio.load(data.data,{decodeEntities: false})
+    var title = $('.title').html()
     var content = ''
-    content +=  '               ' + $('.title').html() + '\n'
+    content +=  '               ' + title + '\n'
     content += $('#chaptercontent').html().replace(/\<script>(.+)<\/script>/g,'').replace(/\<p(.+)\<\/p>/g, '').replace(/<br>/g,'\n')
     writerStream.write(content, 'UTF8')
-    count++
-    remindCount++
-    if (remindCount === 40) {
-        console.log('已完成' + percent + '%')
-        percent += 4
-        remindCount = 0
-    }
-    if (count === 500) {
+    var href = $('#pt_next').attr('href')
+    console.log(title)
+    if (href === '/3_3078/7411274.html') {
+        console.log('读取完成')
         writerStream.end()
         return
     }
-    getNovel($('#pt_next').attr('href'))
+    getNovel(href)
 }
 getNovel()

@@ -16,7 +16,8 @@ var fs = require('fs'),
     rename = require('../tool/rename.js'),
     stockDefault = require('../stock-default.json'),
     rm = require('rimraf'),
-    debugFile = require('../debug/index.js')
+    debugFile = require('../debug/index.js'),
+    createNewFolder = require('../tool/mkdir.js')
 
 program
     .version(require('../package.json').version)
@@ -29,6 +30,7 @@ program
     .option('-r, --rename', 'rename the file suffix in the folder; p.js => p.html  --- crp -r js html')
     .option('-s, --getStock', 'get the stock information')
     .option('-d, --del', 'delete folder or file')
+    .option('-m, --mkdir', 'create a folder with long path')
     .parse(process.argv);
 
 var bool = false,//判断是否有同名文件或者文件夹
@@ -69,20 +71,28 @@ switch (true) {
 	case program.createfloder: 
 		newFolder()
 	break
-	case program.debugFile:
-        debugFile(path.resolve(cmdpath, pname))
+    case program.debugFile:
+        debugFile(path.resolve(cmdpath, pname), () => {
+            exec('subl ' + path.resolve(cmdpath, pname), (err) => errFn(err))
+        })
 	break
 	case program.bts:
 		getBt(pname)
     break
     case program.rename:
-        rename(cmdpath, new RegExp(program.args[0]), program.args[1])
+        if (program.args[0] === undefined || program.args[0] === undefined) {
+            console.log('用法错误, 用法类似于 crp -r js html')
+        }
+        rename(cmdpath, new RegExp(program.args[0]), program.args[1], program.args[2])
     break
     case program.getStock:
         getStock()
     break
     case program.del:
         delFn()
+    break
+    case program.mkdir:
+        batchCreateFolder()
     break
     default :
 		pname.split(',').forEach(x => newFile(x))
@@ -133,38 +143,43 @@ async function fileOrFolderExist (path, str, cb) {
 }
 
 async function newFile (str) { // 生成新文件
-    var arr = pname.split("."),
+    var arr = str.split("."),
         suffix = arr.slice(-1)[0],
         type = arr[arr.length - 1] // 得到文件后缀,判断生成的文件
     switch (true) {
-        case hasFile(pname):
-            openfile(pname)
+        case hasFile(str):
+            openfile(str)
             break;
-        case !!fileMap[pname]:
-            writeFileHandle(fileMap[pname], "")
+        case !!fileMap[str]:
+            writeFileHandle(fileMap[str], "")
             break;
         case !sameFileOrFolder(fileTypeArr, suffix):
-            writeFileHandle(pname, "")
+            writeFileHandle(str, "")
             break;
         default:
             var paths = addstr(temPath, suffix)
             var files = await fsPro(fs.readdir, paths)
-            var hasSameFileOrFolder = sameFileOrFolder(files, pname)
-            var readName = hasSameFileOrFolder ? addstr(paths, pname) : addstr(paths, addstr(program.args[1] || 'tem', suffix, { ps: "." }))
+            var hasSameFileOrFolder = sameFileOrFolder(files, str)
+            var readName = hasSameFileOrFolder ? addstr(paths, str) : addstr(paths, addstr(program.args[1] || 'tem', suffix, { ps: "." }))
             var data = await fsPro(fs.readFile, readName)
             var content = fileNameReplace(data.toString())
+            var num = str.lastIndexOf('/')
+            if (num !== -1) { // src/inec/ll.js  文件名有文件夹的时候要先判断是否存在
+                createNewFolder(str.slice(0, num))
+            }  
             if (suffix === 'java') {
-                pname = firstWordUpper(pname)
+                str = firstWordUpper(str)
             }
-            writeFileHandle(pname, content,  program.args[2])
+            writeFileHandle(str, content,  program.args[2])
     }
 }
 
 function fileNameReplace (str) { // 处理特定格式的文件,把文件名替换进去
     var arr = pname.split(".")
-    var bool = program.args[1] === 'rn' || arr.slice(-1)[0] === 'java'
+    var result = arr[0].split('/').slice(-1)[0]
+    var bool = program.args[1] === 'rn' || arr.slice(-1)[0] === 'java' || arr.slice(-1)[0] === 'jsx'
     if (bool) {
-        return str.replace(/\$/g, arr[0][0].toUpperCase() + arr[0].slice(1))
+        return str.replace(/\$/g, result[0].toUpperCase() + result.slice(1))
     } else {
         return str
     }
@@ -253,6 +268,21 @@ async function getStock () { // 获取股票中需要的信息 (名字 当前价
     )
 
 }
+
+function batchCreateFolder (str = pname) {
+    var num = str.lastIndexOf('/')
+    if (num === -1) {
+        createNewFolder(str)
+    } else {
+        var prefix = str.slice(0, num)
+        var result = str.slice(num+1)
+        result.split(',').map(key => '/' + key).forEach(key => {
+            createNewFolder(prefix + key)
+        })
+    }
+}
+
+
 function arrLog (arr) { // 打印同一个数组的多个索引
     var arg = [].slice.call(arguments, 1)
     var str = arg.map(index => util.getInd(arr, index)).join('  ')
