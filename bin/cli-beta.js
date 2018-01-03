@@ -17,7 +17,8 @@ var fs = require('fs'),
     stockDefault = require('../stock-default.json'),
     rm = require('rimraf'),
     debugFile = require('../debug/index.js'),
-    createNewFolder = require('../tool/mkdir.js')
+    createNewFolder = require('../tool/mkdir.js'),
+    downloadNovel = require('../crawler/novel/search.js')
 
 program
     .version(require('../package.json').version)
@@ -31,6 +32,7 @@ program
     .option('-s, --getStock', 'get the stock information')
     .option('-d, --del', 'delete folder or file')
     .option('-m, --mkdir', 'create a folder with long path')
+    .option('-n, --novel', 'get novel')
     .parse(process.argv);
 
 var bool = false,//判断是否有同名文件或者文件夹
@@ -93,6 +95,9 @@ switch (true) {
     break
     case program.mkdir:
         batchCreateFolder()
+    break
+    case program.novel:
+        downloadNovel(program.args[0])
     break
     default :
 		pname.split(',').forEach(x => newFile(x))

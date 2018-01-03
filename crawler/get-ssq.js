@@ -17,7 +17,7 @@ var count = 0
 var remindCount = 0
 var percent = 0
 async function getNovel (path) {
-    path = path || '/3_3078/7411104.html'
+    path = path || '/75_75941/3963840.html'
     var data = await axios.get(`${host}${path}`)
     var $ = cheerio.load(data.data,{decodeEntities: false})
     var title = $('.title').html()
@@ -27,7 +27,7 @@ async function getNovel (path) {
     writerStream.write(content, 'UTF8')
     var href = $('#pt_next').attr('href')
     console.log(title)
-    if (href === '/3_3078/7411274.html') {
+    if (href === '/75_75941/') {
         console.log('读取完成')
         writerStream.end()
         return
