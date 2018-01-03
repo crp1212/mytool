@@ -56,17 +56,6 @@ async function queryCharter (bookName, db, condition) {
     return list
 }
 
-async function getContent (host, target, writerStream) {
-    var url = new URL(target, host).href
-    var $ = await getCheerio(url)
-    var title = $('.title').html()
-    var content = ''
-    content +=  '               ' + title + '\n'
-    content += $('#chaptercontent').html().replace(/\<script>(.+)<\/script>/g,'').replace(/\<p(.+)\<\/p>/g, '').replace(/<br>/g,'\n')
-    writerStream.write(content, 'UTF8')
-    console.log(title)
-}
-
 async function writeContentToDB (bookName, url, db, condition) {
     var $ = await getCheerio(url)
     var content = $('#chaptercontent').html().replace(/\<script>(.+)<\/script>/g,'').replace(/\<p(.+)\<\/p>/g, '').replace(/<br>/g,'\n')
@@ -114,23 +103,6 @@ async function generateTxt (writerStream, db, bookName) {
         id++
     }
     return '写入完成'
-}
-
-async function getFirst ($) {
-    var list = $('.directoryArea').eq(1).find('a')
-    var len = list.length
-    var i = 0
-    while (i < len) {
-        // 目前可能的情况是 第0001章 第1章 第一章
-        var matchList = list.eq(i).text().match(/第(.+?)章/)
-        if (matchList && (matchList[1] === '一' || parseInt(matchList[1]) === 1)) {
-            return list.eq(i).attr('href')
-        }
-        i++
-    }
-    // 执行到这里的时候应该是没有任何符合的情况,从第一个开始
-    console.log('没有符合第一章的情况')
-    return list.eq(0).attr('href')
 }
 
 async function getChapterList (host, $, arr=[]) { // 获取章节

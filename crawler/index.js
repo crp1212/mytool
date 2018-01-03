@@ -6,28 +6,6 @@ const http    = require('http'),
 	  iconv   = require('iconv-lite');
 axios.defaults.headers.post['Content-Type']='application/x-www-form-urlencoded';
 
-function getBt (str) {
-	axios.get('http://www.zhaonima.com/magnet/'+str+'.html')
-		.then(
-			x => {
-				var $ = cheerio.load(x.data)
-				var arr = []
-				$('.btsowlist').html().replace(/\/(\w+?)\.html/g,function(x,y){arr.push('magnet:?xt=urn:btih:'+y)})
-				console.log(arr)
-			}
-		)
-}
-
-/* var writerStream = fs.createWriteStream('new.json');
-
-// 处理流事件 --> data, end, and error
-writerStream.on('finish', function() {
-    console.log("写入完成。");
-});
-
-writerStream.on('error', function(err){
-   console.log(err.stack);
-}); */
 
 function getSSQ (str) {
 	var obj = {}
@@ -64,6 +42,5 @@ async function getStockNum (stockNum) { // 爬取的是东方财富的股票信�
 }
 
 module.exports = {
-	getBt,
 	getStockNum
 }

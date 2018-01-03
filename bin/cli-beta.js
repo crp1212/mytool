@@ -12,7 +12,6 @@ var fs = require('fs'),
     commonpath = require('../commonpath.json') ,
     websitepath = require('../website.json')
     util = require('../util/index.js'),
-    {getBt, getStockNum} = require('../crawler') ,
     rename = require('../tool/rename.js'),
     stockDefault = require('../stock-default.json'),
     rm = require('rimraf'),
@@ -27,7 +26,6 @@ program
     .option('-f, --createfloder', 'create a new floder with the template')
     .option('-t, --createfile', 'create a new file in specified floder')
     .option('-w, --debugFile', 'debug a file with hot reload')
-    .option('-b, --bts', 'open website which my appoint')
     .option('-r, --rename', 'rename the file suffix in the folder; p.js => p.html  --- crp -r js html')
     .option('-s, --getStock', 'get the stock information')
     .option('-d, --del', 'delete folder or file')
@@ -78,9 +76,6 @@ switch (true) {
             exec('subl ' + path.resolve(cmdpath, pname), (err) => errFn(err))
         })
 	break
-	case program.bts:
-		getBt(pname)
-    break
     case program.rename:
         if (program.args[0] === undefined || program.args[0] === undefined) {
             console.log('用法错误, 用法类似于 crp -r js html')
